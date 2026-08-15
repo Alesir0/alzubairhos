@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جدول التغطية الطبية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800;900&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#152B27;
+    --ink-soft:#5C7A73;
+    --paper:#F6F8F7;
+    --surface:#FFFFFF;
+    --navy:#0C3B3C;
+    --navy-deep:#082826;
+    --teal:#12716B;
+    --mint:#E4F1EC;
+    --mint-line:#D6E6DF;
+    --gold:#B4923F;
+    --gold-soft:#F1E7D2;
+    --call:#1B4D66;
+    --wa:#1F9E5A;
+    --danger:#C1443C;
+    --radius-lg:20px;
+    --radius-md:14px;
+    --radius-sm:10px;
+    --shadow:0 4px 18px rgba(9,43,40,.07);
+  }
+  html[data-theme="dark"]{
+    --ink:#EAF3F0;
+    --ink-soft:#9FB8B1;
+    --paper:#0A2422;
+    --surface:#0F312E;
+    --navy:#0C3B3C;
+    --navy-deep:#061917;
+    --teal:#1D8C82;
+    --mint:#123634;
+    --mint-line:#1D4A46;
+    --gold:#D4B36A;
+    --gold-soft:#2B2413;
+    --call:#2E7096;
+    --wa:#25B368;
+    --danger:#E0645C;
+    --shadow:0 4px 18px rgba(0,0,0,.35);
+  }
+  html[data-theme="dark"] .card,
+  html[data-theme="dark"] .modal,
+  html[data-theme="dark"] .confirm-box,
+  html[data-theme="dark"] nav{
+    background:var(--surface);
+  }
+  html[data-theme="dark"] input,
+  html[data-theme="dark"] select{color:var(--ink);}
+  html[data-theme="dark"] .search-box{background:var(--surface);}
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Tajawal',sans-serif;
+    min-height:100vh;
+    transition:background .25s,color .25s;
+  }
+  body, .card, .modal, nav, .confirm-box, .chip, input, select{
+    transition:background .25s,color .25s,border-color .25s;
+  }
+  h1,h2,h3,.brand-name,.num,.section-title{font-family:'Cairo',sans-serif;}
+  button{font-family:inherit;}
+
+  /* ================= NAVBAR ================= */
+  nav{
+    position:sticky;top:0;z-index:40;
+    background:var(--surface);
+    border-bottom:1px solid var(--mint-line);
+    padding:14px 24px;
+  }
+  .nav-inner{max-width:1080px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .logo-mark{
+    width:38px;height:38px;border-radius:11px;
+    background:linear-gradient(150deg,var(--navy),var(--teal));
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    box-shadow:0 0 0 2px var(--gold-soft);
+  }
+  .logo-mark svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;}
+  .brand-name{font-weight:800;font-size:1.05rem;color:var(--navy-deep);line-height:1.2;}
+  .brand-name small{display:block;font-family:'Tajawal',sans-serif;font-weight:400;font-size:.72rem;color:var(--ink-soft);}
+  .nav-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .nav-btn{
+    display:flex;align-items:center;gap:6px;
+    background:var(--mint);color:var(--navy-deep);
+    border:1px solid var(--mint-line);
+    padding:9px 16px;border-radius:999px;
+    font-weight:700;font-size:.82rem;cursor:pointer;
+    transition:.15s;
+  }
+  .nav-btn:hover{background:var(--teal);color:#fff;border-color:var(--teal);}
+  .nav-btn.ghost{background:transparent;}
+  .nav-btn svg{width:15px;height:15px;}
+  .theme-toggle{
+    width:38px;height:38px;border-radius:50%;
+    background:var(--mint);border:1px solid var(--mint-line);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+  }
+  .theme-toggle svg{width:18px;height:18px;stroke:var(--navy-deep);fill:none;stroke-width:2;}
+  .theme-toggle:hover{background:var(--gold-soft);border-color:var(--gold);}
+
+  /* ================= HERO ================= */
+  .hero{
+    background:var(--surface);
+    color:var(--ink);padding:44px 24px 30px;position:relative;overflow:hidden;
+    border-bottom:1px solid var(--mint-line);
+  }
+  .hero::after{
+    content:"";position:absolute;inset:0;
+    background:radial-gradient(circle at 85% 10%, rgba(180,146,63,.12), transparent 55%);
+    pointer-events:none;
+  }
+  .hero-inner{max-width:1080px;margin:0 auto;position:relative;z-index:2;
+    display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;}
+  .hero-title{font-size:1.7rem;font-weight:800;margin:0 0 6px;color:var(--navy-deep);}
+  .hero-sub{font-size:.88rem;color:var(--ink-soft);max-width:420px;line-height:1.7;margin:0;}
+  .clock-box{text-align:left;background:var(--mint);border:1px solid var(--mint-line);
+    padding:12px 18px;border-radius:var(--radius-md);}
+  .clock-box .time{font-family:'Cairo',sans-serif;font-size:1.5rem;font-weight:800;color:var(--navy-deep);}
+  .clock-box .date{font-size:.72rem;color:var(--ink-soft);margin-top:2px;}
+
+  .ecg-wrap{max-width:1080px;margin:26px auto 0;position:relative;z-index:2;}
+  .ecg{width:100%;height:30px;display:block;}
+  .ecg path{fill:none;stroke:var(--gold);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+    stroke-dasharray:400;stroke-dashoffset:400;animation:draw 2.4s ease forwards infinite;}
+  @keyframes draw{0%{stroke-dashoffset:400;opacity:.9;}70%{stroke-dashoffset:0;opacity:1;}100%{stroke-dashoffset:0;opacity:.15;}}
+
+  /* ================= MAIN ================= */
+  main{max-width:1080px;margin:0 auto 70px;padding:0 24px;}
+  .chips{display:flex;gap:9px;flex-wrap:wrap;margin:26px 0 28px;}
+  .chip{
+    background:var(--surface);border:1px solid var(--mint-line);color:var(--navy-deep);
+    padding:8px 18px;border-radius:999px;font-weight:700;font-size:.82rem;cursor:pointer;transition:.15s;
+  }
+  .chip.active,.chip:hover{background:var(--navy-deep);color:#fff;border-color:var(--gold);}
+
+  .ward-section{margin-bottom:36px;}
+  .ward-title{display:flex;align-items:center;gap:10px;font-size:1.05rem;font-weight:800;color:var(--navy-deep);margin-bottom:16px;}
+  .ward-title .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 4px var(--gold-soft);}
+  .ward-count{font-family:'Tajawal',sans-serif;font-weight:400;font-size:.78rem;color:var(--ink-soft);}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;}
+  .card{
+    background:var(--surface);border:1px solid var(--mint-line);border-radius:var(--radius-lg);
+    padding:20px;display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow);
+    transition:.18s;
+  }
+  .card:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(180,146,63,.18);border-color:var(--gold-soft);}
+  .card-top{display:flex;align-items:center;gap:12px;}
+  .avatar{
+    width:46px;height:46px;border-radius:13px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Cairo',sans-serif;font-weight:800;font-size:1rem;color:#fff;
+  }
+  .doc-name{font-weight:700;font-size:1rem;color:var(--ink);line-height:1.3;}
+  .doc-ward{font-size:.72rem;color:var(--ink-soft);margin-top:2px;}
+  .stars{font-size:.78rem;color:var(--gold);letter-spacing:2px;}
+  .stars .off{color:#E7E2D2;}
+  .actions{display:flex;gap:8px;margin-top:auto;}
+  .btn{
+    flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+    padding:10px 8px;border-radius:11px;text-decoration:none;font-weight:700;font-size:.8rem;
+    color:#fff;border:none;cursor:pointer;
+  }
+  .btn svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:2;}
+  .btn.call{background:var(--call);}
+  .btn.wa{background:var(--wa);}
+  .btn.disabled{background:#EDEAE0;color:#A69E8B;pointer-events:none;}
+  .btn.disabled svg{stroke:#A69E8B;}
+
+  .empty{text-align:center;padding:70px 20px;color:var(--ink-soft);}
+  .empty svg{width:40px;height:40px;stroke:var(--ink-soft);fill:none;stroke-width:1.5;margin-bottom:10px;}
+
+  footer{text-align:center;padding:24px;color:var(--ink-soft);font-size:.75rem;}
+
+  /* ================= OVERLAY / MODALS ================= */
+  .overlay{
+    position:fixed;inset:0;background:rgba(8,40,38,.55);backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;z-index:100;padding:20px;
+  }
+  .overlay.show{display:flex;}
+  .modal{
+    background:var(--surface);border-radius:var(--radius-lg);padding:28px;
+    width:100%;max-width:460px;max-height:88vh;overflow-y:auto;position:relative;
+    box-shadow:0 20px 60px rgba(0,0,0,.25);
+  }
+  .modal.wide{max-width:820px;}
+  .modal-close{
+    position:absolute;top:16px;left:16px;background:var(--mint);border:none;
+    width:30px;height:30px;border-radius:50%;cursor:pointer;color:var(--navy-deep);font-size:1rem;
+  }
+  .modal h3{margin:0 0 6px;font-size:1.15rem;color:var(--navy-deep);}
+  .modal .sub{font-size:.8rem;color:var(--ink-soft);margin:0 0 20px;line-height:1.6;}
+  .lock-badge{
+    width:44px;height:44px;border-radius:13px;background:var(--mint);
+    display:flex;align-items:center;justify-content:center;margin-bottom:14px;
+  }
+  .lock-badge svg{width:20px;height:20px;stroke:var(--teal);fill:none;stroke-width:2;}
+
+  label{font-size:.78rem;font-weight:700;color:var(--navy-deep);display:block;margin-bottom:5px;}
+  input,select{
+    width:100%;padding:11px 13px;border:1px solid var(--mint-line);border-radius:var(--radius-sm);
+    font-family:'Tajawal',sans-serif;font-size:.88rem;background:var(--mint);margin-bottom:14px;
+  }
+  input:focus,select:focus{outline:2px solid var(--teal);outline-offset:1px;background:#fff;}
+  .rating-input{display:flex;gap:6px;align-items:center;margin-bottom:14px;}
+  .rating-input button{background:none;border:none;font-size:1.4rem;cursor:pointer;color:#E7E2D2;}
+  .rating-input button.on{color:var(--gold);}
+  .form-actions{display:flex;gap:10px;margin-top:4px;}
+  .primary-btn{
+    background:var(--navy-deep);color:#fff;border:2px solid var(--navy-deep);padding:10px 22px;
+    border-radius:var(--radius-sm);font-weight:700;cursor:pointer;flex:1;font-size:.88rem;transition:.15s;
+  }
+  .primary-btn:hover{background:var(--teal);border-color:var(--gold);}
+  .ghost-btn{
+    background:none;border:1px solid var(--mint-line);color:var(--ink);padding:12px 22px;
+    border-radius:var(--radius-sm);font-weight:700;cursor:pointer;font-size:.88rem;
+  }
+  .tabs{display:flex;gap:6px;background:var(--mint);padding:4px;border-radius:999px;margin-bottom:20px;}
+  .tab{flex:1;text-align:center;padding:9px;border-radius:999px;font-weight:700;font-size:.82rem;cursor:pointer;color:var(--ink-soft);}
+  .tab.active{background:var(--surface);color:var(--navy-deep);box-shadow:var(--shadow);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  .mini-list{display:flex;flex-direction:column;gap:10px;}
+  .mini-item{
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+    background:var(--mint);border-radius:var(--radius-sm);padding:12px 14px;
+  }
+  .mini-item .info{font-size:.85rem;}
+  .mini-item .info b{display:block;}
+  .mini-item .info span{color:var(--ink-soft);font-size:.75rem;}
+  .mini-actions button{border:none;background:none;cursor:pointer;font-size:.85rem;margin-inline-start:8px;font-weight:700;}
+  .mini-actions .edit{color:var(--call);}
+  .mini-actions .del{color:var(--danger);}
+  .empty-mini{text-align:center;color:var(--ink-soft);font-size:.82rem;padding:30px 10px;}
+
+  table{width:100%;border-collapse:collapse;font-size:.83rem;}
+  th,td{padding:10px;text-align:right;border-bottom:1px solid var(--mint-line);}
+  th{color:var(--ink-soft);font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.3px;}
+  .admin-section{margin-bottom:22px;}
+  .admin-section h4{font-size:.95rem;color:var(--navy-deep);margin:0 0 12px;}
+  .note{font-size:.77rem;color:var(--ink-soft);line-height:1.7;margin-top:12px;background:var(--mint);padding:12px 14px;border-radius:var(--radius-sm);}
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0 14px;}
+
+  @media(max-width:640px){
+    .hero-inner{flex-direction:column;align-items:flex-start;}
+    .clock-box{text-align:right;}
+  }
+
+  /* ================= TOAST ================= */
+  #toastBox{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+    z-index:300;display:flex;flex-direction:column;gap:8px;align-items:center;
+    pointer-events:none;width:100%;padding:0 16px;
+  }
+  .toast{
+    background:var(--navy-deep);color:#fff;padding:12px 20px;border-radius:999px;
+    font-size:.85rem;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.25);
+    opacity:0;transform:translateY(10px);transition:.25s;max-width:90vw;text-align:center;
+  }
+  .toast.show{opacity:1;transform:translateY(0);}
+  .toast.error{background:var(--danger);}
+
+  /* ================= CONFIRM DIALOG ================= */
+  .confirm-overlay{
+    position:fixed;inset:0;background:rgba(8,40,38,.6);backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;z-index:200;padding:20px;
+  }
+  .confirm-overlay.show{display:flex;}
+  .confirm-box{
+    background:var(--surface);border-radius:var(--radius-lg);padding:26px;
+    width:100%;max-width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);
+  }
+  .confirm-box .icon{
+    width:44px;height:44px;border-radius:50%;background:#FBE9E7;color:var(--danger);
+    display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.3rem;
+  }
+  .confirm-box p{font-size:.9rem;color:var(--ink);margin:0 0 20px;line-height:1.6;}
+  .confirm-box .form-actions{margin-top:0;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="brand">
+      <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18" stroke-linecap="round"/></svg></div>
+      <div class="brand-name">الهيئة الطبية<small>جدول التغطية والمناوبة</small></div>
+    </div>
+    <div class="nav-actions">
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="تبديل الوضع الليلي/النهاري" aria-label="تبديل الوضع الليلي والنهاري">
+        <svg id="themeIcon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke-linecap="round"/></svg>
+      </button>
+      <button class="nav-btn" onclick="openMemberGate()">
+        <svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        دخول الأعضاء
+      </button>
+      <button class="nav-btn ghost" onclick="openAdminGate()">
+        <svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.6 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V9a1.7 1.7 0 001.5 1h.1a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div>
+      <h1 class="hero-title">جدول التغطية الطبية</h1>
+      <p class="hero-sub">الأطباء المناوبون حالياً حسب الردهة — اضغط على أيقونة الاتصال أو واتساب للتواصل المباشر.</p>
+    </div>
+    <div class="clock-box">
+      <div class="time" id="clockTime">--:--</div>
+      <div class="date" id="clockDate">--</div>
+    </div>
+  </div>
+  <div class="ecg-wrap">
+    <svg class="ecg" viewBox="0 0 500 30" preserveAspectRatio="none">
+      <path d="M0,15 L120,15 L140,3 L160,27 L180,15 L500,15"></path>
+    </svg>
+  </div>
+</div>
+
+<main>
+  <div class="chips" id="wardChips"></div>
+  <div id="publicList"></div>
+</main>
+
+<footer>جميع الحقوق محفوظة — لوحة داخلية لعرض جدول التغطية الطبية</footer>
+
+<!-- ===== Overlay ===== -->
+<div class="overlay" id="overlay">
+  <div class="modal" id="modalBox"></div>
+</div>
+
+<!-- ===== Confirm dialog ===== -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="icon">!</div>
+    <p id="confirmMessage"></p>
+    <div class="form-actions">
+      <button class="primary-btn" id="confirmYesBtn" style="background:var(--danger);">تأكيد</button>
+      <button class="ghost-btn" onclick="closeConfirm()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Toast ===== -->
+<div id="toastBox"></div>
+
+<script>
+/* ===================== الإعدادات ===================== */
+const MEMBER_CODE = "MED2026";
+const ADMIN_PIN   = "1234";
+const STORAGE_KEY = "oncall_doctors_v2";
+const MY_ENTRIES_KEY = "oncall_my_entries_v2";
+
+const AVATAR_COLORS = ["#0C3B3C","#12716B","#B4923F","#1B4D66","#0F5C57"];
+
+const seedData = [
+  { id:1, name:"علي وسام", ward:"باطنية", call:"", wa:"", rating:0, ownerToken:null }
+];
+
+let doctors = [];
+let activeWard = "الكل";
+let currentRating = 0;
+let editingIdAdmin = null;
+let editingIdMember = null;
+
+/* ===================== تنبيهات وتأكيد مخصصة (بديل alert/confirm الأصلية) ===================== */
+function showToast(msg, type){
+  const box = document.getElementById('toastBox');
+  const t = document.createElement('div');
+  t.className = 'toast' + (type==='error' ? ' error' : '');
+  t.textContent = msg;
+  box.appendChild(t);
+  requestAnimationFrame(()=>t.classList.add('show'));
+  setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(),300); }, 2600);
+}
+function customConfirm(message, onYes){
+  document.getElementById('confirmMessage').textContent = message;
+  document.getElementById('confirmOverlay').classList.add('show');
+  const yesBtn = document.getElementById('confirmYesBtn');
+  const newYesBtn = yesBtn.cloneNode(true);
+  yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
+  newYesBtn.addEventListener('click', ()=>{ closeConfirm(); onYes(); });
+}
+function closeConfirm(){ document.getElementById('confirmOverlay').classList.remove('show'); }
+
+/* ===================== الوضع الليلي / النهاري ===================== */
+const THEME_KEY = "oncall_theme";
+const ICON_SUN = `<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke-linecap="round"/>`;
+const ICON_MOON = `<path d="M20 14.5A8.5 8.5 0 119.5 4a7 7 0 0010.5 10.5z" stroke-linejoin="round"/>`;
+
+function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('themeIcon').innerHTML = theme === 'dark' ? ICON_MOON : ICON_SUN;
+  localStorage.setItem(THEME_KEY, theme);
+}
+function toggleTheme(){
+  const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+}
+applyTheme(localStorage.getItem(THEME_KEY) || 'light');
+
+/* ===================== تحميل / حفظ ===================== */
+async function loadData(){
+  try{
+    const res = await fetch('data.json',{cache:"no-store"});
+    if(res.ok){
+      const json = await res.json();
+      if(Array.isArray(json) && json.length){ doctors = json; renderAll(); return; }
+    }
+  }catch(e){}
+  const local = localStorage.getItem(STORAGE_KEY);
+  doctors = local ? JSON.parse(local) : seedData;
+  renderAll();
+}
+function persist(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(doctors)); }
+
+function getMyEntries(){ return JSON.parse(localStorage.getItem(MY_ENTRIES_KEY) || "[]"); }
+function saveMyEntries(list){ localStorage.setItem(MY_ENTRIES_KEY, JSON.stringify(list)); }
+function genToken(){ return 'tok_' + Math.random().toString(36).slice(2) + Date.now().toString(36); }
+
+/* ===================== الساعة ===================== */
+function tickClock(){
+  const now = new Date();
+  document.getElementById('clockTime').textContent = now.toLocaleTimeString('ar-IQ',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('clockDate').textContent = now.toLocaleDateString('ar-IQ',{weekday:'long', year:'numeric', month:'long', day:'numeric'});
+}
+tickClock(); setInterval(tickClock,1000);
+
+/* ===================== أدوات عرض ===================== */
+function initials(name){
+  const parts = name.trim().split(/\s+/);
+  return ((parts[0]?.[0]||'') + (parts[1]?.[0]||'')).toUpperCase();
+}
+function colorFor(str){
+  let h=0; for(let i=0;i<str.length;i++) h = str.charCodeAt(i) + ((h<<5)-h);
+  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+}
+function starsHTML(rating){
+  let s='<span class="stars">';
+  for(let i=1;i<=5;i++) s += i<=rating ? '★' : '<span class="off">★</span>';
+  return s+'</span>';
+}
+const ICON_PHONE = `<svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1.9.3 1.8.6 2.7a2 2 0 01-.5 2.1L8 9.7a16 16 0 006 6l1.2-1.2a2 2 0 012.1-.5c.9.3 1.8.5 2.7.6a2 2 0 011.7 2.1z" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const ICON_CHAT = `<svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 01-9.4 8.3 8.6 8.6 0 01-3-.7L3 21l1.9-5.6a8.4 8.4 0 01-.9-3.9A8.4 8.4 0 0112.5 3 8.4 8.4 0 0121 11.5z" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+function renderAll(){ renderChips(); renderPublic(); }
+
+function renderChips(){
+  const wards = ["الكل", ...new Set(doctors.map(d=>d.ward).filter(Boolean))];
+  const box = document.getElementById('wardChips'); box.innerHTML='';
+  wards.forEach(w=>{
+    const chip = document.createElement('button');
+    chip.className = 'chip' + (w===activeWard?' active':'');
+    chip.textContent = w;
+    chip.onclick = ()=>{ activeWard=w; renderChips(); renderPublic(); };
+    box.appendChild(chip);
+  });
+}
+
+function renderPublic(){
+  const list = document.getElementById('publicList');
+  let filtered = activeWard==="الكل" ? doctors : doctors.filter(d=>d.ward===activeWard);
+
+  if(!filtered.length){
+    list.innerHTML = `<div class="empty">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 10h.01M15 10h.01M8 15c1 1 2 1.5 4 1.5s3-.5 4-1.5" stroke-linecap="round"/></svg>
+      <div>لا يوجد أطباء مطابقون حالياً.</div>
+    </div>`;
+    return;
+  }
+  const groups = {};
+  filtered.forEach(d=>{ const w=d.ward||"غير محدد"; (groups[w]=groups[w]||[]).push(d); });
+
+  list.innerHTML = Object.entries(groups).map(([ward,docs])=>`
+    <div class="ward-section">
+      <div class="ward-title"><span class="dot"></span> خفر ${ward} <span class="ward-count">(${docs.length})</span></div>
+      <div class="cards">
+        ${docs.map(d=>`
+          <div class="card">
+            <div class="card-top">
+              <div class="avatar" style="background:${colorFor(d.ward+d.name)}">${initials(d.name)}</div>
+              <div>
+                <div class="doc-name">${d.name}</div>
+                <div class="doc-ward">${d.ward}</div>
+              </div>
+            </div>
+            ${starsHTML(d.rating||0)}
+            <div class="actions">
+              ${d.call ? `<a class="btn call" href="tel:${d.call}" target="_blank" rel="noopener">${ICON_PHONE} اتصال</a>` : `<span class="btn disabled">${ICON_PHONE} اتصال</span>`}
+              ${d.wa ? `<a class="btn wa" href="https://wa.me/${d.wa}" target="_blank" rel="noopener">${ICON_CHAT} واتساب</a>` : `<span class="btn disabled">${ICON_CHAT} واتساب</span>`}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ===================== الأوفرلاي العام ===================== */
+function openModal(html){
+  document.getElementById('modalBox').innerHTML = `<button class="modal-close" onclick="closeModal()">✕</button>` + html;
+  document.getElementById('overlay').classList.add('show');
+}
+function closeModal(){ document.getElementById('overlay').classList.remove('show'); }
+document.getElementById('overlay').addEventListener('click', e=>{ if(e.target.id==='overlay') closeModal(); });
+
+/* ===================== بوابة الأعضاء ===================== */
+function openMemberGate(){
+  openModal(`
+    <div class="lock-badge"><svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <h3>دخول الأعضاء</h3>
+    <p class="sub">هذا الدخول مخصص للأطباء لإضافة أنفسهم إلى جدول المناوبة فقط.</p>
+    <label>رمز العضوية</label>
+    <input type="password" id="memberCodeInput" placeholder="أدخل رمز العضوية" maxlength="20">
+    <div class="form-actions">
+      <button class="primary-btn" onclick="checkMemberCode()">دخول</button>
+      <button class="ghost-btn" onclick="closeModal()">إلغاء</button>
+    </div>
+  `);
+}
+function checkMemberCode(){
+  const val = document.getElementById('memberCodeInput').value;
+  if(val === MEMBER_CODE) openMemberPanel();
+  else showToast('رمز عضوية غير صحيح', 'error');
+}
+
+function openMemberPanel(){
+  editingIdMember = null;
+  openModal(`
+    <h3>لوحة الأعضاء</h3>
+    <p class="sub">أضف بيانات مناوبتك، أو عدّل/احذف الإدخالات التي أضفتها بنفسك من هذا الجهاز.</p>
+    <div class="tabs">
+      <div class="tab active" data-tab="add" onclick="switchMemberTab('add')">أضف نفسي</div>
+      <div class="tab" data-tab="mine" onclick="switchMemberTab('mine')">إدخالاتي</div>
+    </div>
+    <div class="tab-panel active" id="tab-add">
+      <label>اسم الطبيب</label>
+      <input id="m_name" placeholder="اسمك الكامل">
+      <label>اسم الردهة / الخفر</label>
+      <input id="m_ward" placeholder="مثال: باطنية">
+      <label>رقم الهاتف (اتصال)</label>
+      <input id="m_call" placeholder="مثال: 07701234567">
+      <label>رقم الهاتف (واتساب)</label>
+      <input id="m_wa" placeholder="مثال: 9647701234567">
+      <div class="form-actions">
+        <button class="primary-btn" onclick="memberSave()">حفظ في الجدول</button>
+      </div>
+    </div>
+    <div class="tab-panel" id="tab-mine">
+      <div class="mini-list" id="mineList"></div>
+    </div>
+  `);
+  renderMineList();
+}
+function switchMemberTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
+  document.getElementById('tab-add').classList.toggle('active', name==='add');
+  document.getElementById('tab-mine').classList.toggle('active', name==='mine');
+  if(name==='mine') renderMineList();
+}
+
+function memberSave(){
+  const name = document.getElementById('m_name').value.trim();
+  const ward = document.getElementById('m_ward').value.trim();
+  const call = document.getElementById('m_call').value.trim();
+  const wa = document.getElementById('m_wa').value.trim();
+  if(!name || !ward){ showToast('يرجى إدخال الاسم والردهة على الأقل', 'error'); return; }
+
+  if(editingIdMember){
+    const d = doctors.find(x=>x.id===editingIdMember);
+    Object.assign(d,{name,ward,call,wa});
+  } else {
+    const newId = doctors.length ? Math.max(...doctors.map(d=>d.id))+1 : 1;
+    const token = genToken();
+    doctors.push({id:newId,name,ward,call,wa,rating:0,ownerToken:token});
+    const mine = getMyEntries(); mine.push({id:newId, token}); saveMyEntries(mine);
+  }
+  persist(); renderAll();
+  const wasEditing = !!editingIdMember;
+  editingIdMember = null;
+  document.getElementById('m_name').value='';
+  document.getElementById('m_ward').value='';
+  document.getElementById('m_call').value='';
+  document.getElementById('m_wa').value='';
+  switchMemberTab('mine');
+  showToast(wasEditing ? 'تم تحديث بياناتك' : 'تمت إضافتك إلى الجدول');
+}
+
+function renderMineList(){
+  const mine = getMyEntries();
+  const box = document.getElementById('mineList');
+  if(!box) return;
+  const mineDocs = mine.map(m=>doctors.find(d=>d.id===m.id)).filter(Boolean);
+  if(!mineDocs.length){ box.innerHTML = '<div class="empty-mini">لم تضِف أي بيانات من هذا الجهاز بعد.</div>'; return; }
+  box.innerHTML = mineDocs.map(d=>`
+    <div class="mini-item">
+      <div class="info"><b>${d.name}</b><span>${d.ward} — ${d.call||'بدون رقم'}</span></div>
+      <div class="mini-actions">
+        <button class="edit" onclick="memberEdit(${d.id})">تعديل</button>
+        <button class="del" onclick="memberDelete(${d.id})">حذف</button>
+      </div>
+    </div>
+  `).join('');
+}
+function memberEdit(id){
+  const d = doctors.find(x=>x.id===id); if(!d) return;
+  editingIdMember = id;
+  switchMemberTab('add');
+  document.getElementById('m_name').value=d.name;
+  document.getElementById('m_ward').value=d.ward;
+  document.getElementById('m_call').value=d.call;
+  document.getElementById('m_wa').value=d.wa;
+}
+function memberDelete(id){
+  customConfirm('حذف إدخالك من جدول المناوبة؟', ()=>{
+    doctors = doctors.filter(x=>x.id!==id);
+    let mine = getMyEntries(); mine = mine.filter(m=>m.id!==id); saveMyEntries(mine);
+    persist(); renderAll(); renderMineList();
+    showToast('تم الحذف');
+  });
+}
+
+/* ===================== بوابة الإدارة ===================== */
+function openAdminGate(){
+  openModal(`
+    <div class="lock-badge"><svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/></svg></div>
+    <h3>دخول الإدارة</h3>
+    <p class="sub">صلاحية كاملة: إضافة، تعديل، حذف أي طبيب، وتحديد التقييم.</p>
+    <label>الرمز السري</label>
+    <input type="password" id="adminPinInput" placeholder="أدخل الرمز" maxlength="20">
+    <div class="form-actions">
+      <button class="primary-btn" onclick="checkAdminPin()">دخول</button>
+      <button class="ghost-btn" onclick="closeModal()">إلغاء</button>
+    </div>
+  `);
+}
+function checkAdminPin(){
+  const val = document.getElementById('adminPinInput').value;
+  if(val === ADMIN_PIN) openAdminPanel();
+  else showToast('رمز غير صحيح', 'error');
+}
+
+function openAdminPanel(){
+  editingIdAdmin = null; currentRating = 0;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('modalBox').className = 'modal wide';
+  document.getElementById('modalBox').innerHTML = `
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3>لوحة الإدارة</h3>
+    <p class="sub">صلاحية كاملة على جدول التغطية.</p>
+
+    <div class="admin-section">
+      <h4 id="adminFormTitle">إضافة طبيب</h4>
+      <div class="form-grid">
+        <div><label>اسم الطبيب</label><input id="a_name"></div>
+        <div><label>اسم الردهة</label><input id="a_ward"></div>
+        <div><label>رقم الاتصال</label><input id="a_call"></div>
+        <div><label>رقم واتساب</label><input id="a_wa"></div>
+      </div>
+      <label>التقييم من الإدارة</label>
+      <div class="rating-input" id="ratingInput"></div>
+      <div class="form-actions">
+        <button class="primary-btn" onclick="adminSave()">حفظ</button>
+        <button class="ghost-btn" onclick="adminResetForm()">تفريغ</button>
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <h4>كل الأطباء (<span id="countLabel">0</span>)</h4>
+      <table>
+        <thead><tr><th>الطبيب</th><th>الردهة</th><th>اتصال</th><th>واتساب</th><th>التقييم</th><th></th></tr></thead>
+        <tbody id="adminTableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="admin-section">
+      <h4>نسخ احتياطي / مزامنة مع GitHub</h4>
+      <div class="form-actions">
+        <button class="primary-btn" onclick="exportJSON()">⬇ تنزيل data.json</button>
+        <label class="ghost-btn" style="text-align:center;cursor:pointer;">
+          ⬆ استيراد JSON
+          <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importJSON(event)">
+        </label>
+      </div>
+      <div class="note">أي تعديل هنا يُحفظ أولاً في متصفح هذا الجهاز. لعرضه لكل الزوّار: نزّل data.json وارفعه إلى مستودع GitHub بنفس الاسم.</div>
+    </div>
+  `;
+  buildRatingInput();
+  renderAdminTable();
+}
+
+function buildRatingInput(){
+  const box = document.getElementById('ratingInput'); if(!box) return;
+  box.innerHTML='';
+  for(let i=1;i<=5;i++){
+    const b = document.createElement('button'); b.type='button'; b.textContent='★';
+    b.className = i<=currentRating ? 'on' : '';
+    b.onclick = ()=>{ currentRating=i; buildRatingInput(); };
+    box.appendChild(b);
+  }
+}
+function adminResetForm(){
+  editingIdAdmin=null; currentRating=0;
+  document.getElementById('adminFormTitle').textContent='إضافة طبيب';
+  ['a_name','a_ward','a_call','a_wa'].forEach(id=>document.getElementById(id).value='');
+  buildRatingInput();
+}
+function adminSave(){
+  const name = document.getElementById('a_name').value.trim();
+  const ward = document.getElementById('a_ward').value.trim();
+  const call = document.getElementById('a_call').value.trim();
+  const wa = document.getElementById('a_wa').value.trim();
+  if(!name||!ward){ showToast('أدخل الاسم والردهة على الأقل', 'error'); return; }
+  if(editingIdAdmin){
+    const d = doctors.find(x=>x.id===editingIdAdmin);
+    Object.assign(d,{name,ward,call,wa,rating:currentRating});
+  } else {
+    const newId = doctors.length ? Math.max(...doctors.map(d=>d.id))+1 : 1;
+    doctors.push({id:newId,name,ward,call,wa,rating:currentRating,ownerToken:null});
+  }
+  const wasEditing = !!editingIdAdmin;
+  persist(); adminResetForm(); renderAdminTable(); renderAll();
+  showToast(wasEditing ? 'تم التحديث' : 'تمت الإضافة');
+}
+function adminEdit(id){
+  const d = doctors.find(x=>x.id===id); if(!d) return;
+  editingIdAdmin=id; currentRating=d.rating||0;
+  document.getElementById('adminFormTitle').textContent='تعديل بيانات الطبيب';
+  document.getElementById('a_name').value=d.name;
+  document.getElementById('a_ward').value=d.ward;
+  document.getElementById('a_call').value=d.call;
+  document.getElementById('a_wa').value=d.wa;
+  buildRatingInput();
+}
+function adminDelete(id){
+  customConfirm('تأكيد حذف هذا الطبيب؟', ()=>{
+    doctors = doctors.filter(x=>x.id!==id);
+    let mine = getMyEntries(); mine = mine.filter(m=>m.id!==id); saveMyEntries(mine);
+    persist(); renderAdminTable(); renderAll();
+    showToast('تم الحذف');
+  });
+}
+function renderAdminTable(){
+  const body = document.getElementById('adminTableBody'); if(!body) return;
+  document.getElementById('countLabel').textContent = doctors.length;
+  body.innerHTML = doctors.map(d=>`
+    <tr>
+      <td>${d.name}</td><td>${d.ward}</td><td>${d.call||'—'}</td><td>${d.wa||'—'}</td>
+      <td>${starsHTML(d.rating||0)}</td>
+      <td>
+        <button class="edit" style="border:none;background:none;color:var(--call);cursor:pointer;font-weight:700;" onclick="adminEdit(${d.id})">تعديل</button>
+        <button class="del" style="border:none;background:none;color:var(--danger);cursor:pointer;font-weight:700;margin-inline-start:8px;" onclick="adminDelete(${d.id})">حذف</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+/* ===================== تصدير / استيراد ===================== */
+function exportJSON(){
+  const blob = new Blob([JSON.stringify(doctors,null,2)],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='data.json'; a.click();
+  URL.revokeObjectURL(url);
+}
+function importJSON(event){
+  const file = event.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    try{
+      const json = JSON.parse(e.target.result);
+      if(!Array.isArray(json)) throw new Error();
+      doctors = json; persist(); renderAdminTable(); renderAll();
+      showToast('تم الاستيراد بنجاح');
+    }catch(err){ showToast('ملف غير صالح', 'error'); }
+  };
+  reader.readAsText(file); event.target.value='';
+}
+
+loadData();
+</script>
+</body>
+</html>
