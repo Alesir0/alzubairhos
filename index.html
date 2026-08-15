@@ -365,6 +365,10 @@
 <!-- ===== Toast ===== -->
 <div id="toastBox"></div>
 
+<!-- ============ Firebase (لمزامنة البيانات لحظياً بين كل الزوار) ============ -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
 <script>
 /* =====================================================================
    الإعدادات
@@ -374,10 +378,32 @@
 const MEMBER_CODE = "1200";
 const ADMIN_PIN   = "ahmed2010";
 
-const KEY_ROSTER = "oncall_roster_v3";   // قائمة الأطباء الأساسية (يديرها المدير)
-const KEY_WARDS  = "oncall_wards_v3";    // قائمة الردهات (يديرها المدير)
-const KEY_ACTIVE = "oncall_active_v3";   // من هو خفر الآن (يضيفه الطبيب بنفسه)
-const KEY_MINE   = "oncall_my_active_v3";// أي إدخالات خفر أضفتها من هذا الجهاز
+/* ====== إعدادات Firebase — استبدل هذه القيم بقيم مشروعك من Firebase Console ======
+   بدون هذه الخطوة، الموقع يعمل محلياً فقط على كل جهاز على حدة (بدون مزامنة). */
+const firebaseConfig = {
+  apiKey: "AIzaSyBsuuZVOKSo_Gwwtr-u405I5ytaXFh_LLs",
+  authDomain: "zubair-oncall.firebaseapp.com",
+  databaseURL: "ضع_databaseURL_هنا",
+  projectId: "zubair-oncall",
+  storageBucket: "zubair-oncall.firebasestorage.app",
+  messagingSenderId: "978991006026",
+  appId: "1:978991006026:web:575da6ab976da3f1ec81b3"
+};
+
+let fbEnabled = false;
+let dbRef = null;
+try{
+  if(firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("ضع_")){
+    firebase.initializeApp(firebaseConfig);
+    dbRef = firebase.database().ref('oncallData');
+    fbEnabled = true;
+  }
+}catch(e){ fbEnabled = false; }
+
+const KEY_ROSTER = "oncall_roster_v3";   // نسخة محلية مخزّنة (cache) من قائمة الأطباء
+const KEY_WARDS  = "oncall_wards_v3";    // نسخة محلية مخزّنة (cache) من قائمة الردهات
+const KEY_ACTIVE = "oncall_active_v3";   // نسخة محلية مخزّنة (cache) من الخفر الحالي
+const KEY_MINE   = "oncall_my_active_v3";// أي إدخالات خفر أضفتها من هذا الجهاز (خاص بالجهاز فقط)
 
 const AVATAR_COLORS = ["#0C3B3C","#12716B","#B4923F","#1B4D66","#0F5C57"];
 
@@ -432,26 +458,54 @@ function toggleTheme(){
 applyTheme(localStorage.getItem(THEME_KEY) || 'light');
 
 /* ===================== تحميل / حفظ ===================== */
-async function loadData(){
-  try{
-    const res = await fetch('data.json',{cache:"no-store"});
-    if(res.ok){
-      const json = await res.json();
-      if(json && Array.isArray(json.roster)){
-        roster = json.roster; wards = json.wards||[]; active = json.active||[];
-        renderAll(); return;
-      }
-    }
-  }catch(e){}
+function cacheLocally(){
+  localStorage.setItem(KEY_ROSTER, JSON.stringify(roster));
+  localStorage.setItem(KEY_WARDS, JSON.stringify(wards));
+  localStorage.setItem(KEY_ACTIVE, JSON.stringify(active));
+}
+function refreshOpenAdminViews(){
+  if(document.getElementById('adminDoctorsBody')) renderAdminDoctorsTable();
+  if(document.getElementById('wardTagList')) renderWardTagList();
+  if(document.getElementById('adminActiveBody')) renderAdminActiveTable();
+}
+
+function loadData(){
+  // عرض فوري من النسخة المخزّنة محلياً ريثما يتصل بقاعدة البيانات المشتركة
   roster = JSON.parse(localStorage.getItem(KEY_ROSTER) || "null") || seedRoster;
   wards  = JSON.parse(localStorage.getItem(KEY_WARDS)  || "null") || seedWards;
   active = JSON.parse(localStorage.getItem(KEY_ACTIVE) || "null") || [];
   renderAll();
+
+  if(!fbEnabled){
+    showToast('لم يتم ربط قاعدة بيانات مشتركة — التغييرات تُحفظ على هذا الجهاز فقط', 'error');
+    return;
+  }
+
+  // الاستماع اللحظي: أي تغيير من أي زائر/إدارة ينعكس فوراً على الجميع
+  dbRef.on('value', snap=>{
+    const val = snap.val();
+    if(val){
+      roster = val.roster || [];
+      wards = val.wards || [];
+      active = val.active || [];
+    } else {
+      // أول تشغيل لقاعدة البيانات: ازرع البيانات الابتدائية
+      roster = seedRoster; wards = seedWards; active = [];
+      dbRef.set({roster,wards,active});
+    }
+    cacheLocally();
+    renderAll();
+    refreshOpenAdminViews();
+  }, err=>{
+    showToast('تعذر الاتصال بقاعدة البيانات المشتركة', 'error');
+  });
 }
+
 function persist(){
-  localStorage.setItem(KEY_ROSTER, JSON.stringify(roster));
-  localStorage.setItem(KEY_WARDS, JSON.stringify(wards));
-  localStorage.setItem(KEY_ACTIVE, JSON.stringify(active));
+  cacheLocally();
+  if(fbEnabled){
+    dbRef.set({roster,wards,active}).catch(()=>showToast('تعذر حفظ التغيير على الخادم، تحقق من الاتصال', 'error'));
+  }
 }
 function getMyActive(){ return JSON.parse(localStorage.getItem(KEY_MINE) || "[]"); }
 function saveMyActive(list){ localStorage.setItem(KEY_MINE, JSON.stringify(list)); }
@@ -745,7 +799,7 @@ function openAdminPanel(){
           <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importJSON(event)">
         </label>
       </div>
-      <div class="note">أي تعديل هنا يُحفظ أولاً في متصفح هذا الجهاز. لعرضه لكل الزوّار: نزّل data.json وارفعه إلى مستودع GitHub بنفس الاسم.</div>
+      <div class="note">${fbEnabled ? 'قاعدة البيانات المشتركة مفعّلة — أي تعديل هنا يظهر تلقائياً لكل الزوار فوراً. زر التنزيل/الاستيراد هنا لأخذ نسخة احتياطية فقط.' : 'تنبيه: لم يتم ربط قاعدة بيانات مشتركة بعد، لذلك التعديلات تُحفظ على هذا الجهاز فقط ولن يراها بقية الزوار. راجع تعليمات ربط Firebase.'}</div>
     </div>
   `, true);
   buildRatingInput();
